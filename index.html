@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusFlow 360 - Gestao Integrada de Incidentes Academicos</title>
+    <meta name="description" content="CampusFlow 360 - ecossistema digital inteligente para triagem, ordenacao automatizada de alta prioridade e analise preditiva de riscos de infraestrutura academica.">
+    <meta name="keywords" content="chamados, infraestrutura, universidade, laboratorio, suporte tecnico, triagem automatica">
+    <meta property="og:title" content="CampusFlow 360 - Triagem Inteligente Academica">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <i class="fa-solid fa-graduation-cap login-icon"></i>
+            <h2>CampusFlow 360</h2>
+            <p class="login-subtitle">Selecione seu perfil para acessar o sistema</p>
+            <div class="login-roles">
+                <button class="login-role-btn" onclick="selectRole('aluno_professor')">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    <div>
+                        <div>Aluno / Professor</div>
+                        <div class="role-desc">Abrir chamados de suporte tecnico</div>
+                    </div>
+                </button>
+                <button class="login-role-btn" onclick="selectRole('gestao')">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <div>
+                        <div>Gestao</div>
+                        <div class="role-desc">Triar chamados e visualizar analises</div>
+                    </div>
+                </button>
+                <button class="login-role-btn" onclick="selectRole('admin')">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <div>Administrador</div>
+                        <div class="role-desc">Acesso total ao sistema</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="app-main" style="display:none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap logo-icon"></i>
+                <div class="brand-text">
+                    <h1>CampusFlow 360</h1>
+                    <span>Ecossistema Academico de Gestao de Incidentes</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon-back" id="btn-back-login" title="Trocar Perfil" style="padding:8px 12px; border-radius:var(--radius-md); background:var(--accent-blue-dim); border:1px solid rgba(2,132,199,0.2); color:var(--accent-blue); cursor:pointer; font-size:14px; transition:var(--transition-fast);">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+                <div class="user-badge" id="user-badge">
+                    <i class="fa-solid fa-user-circle"></i>
+                    <span id="user-role-label">-</span>
+                </div>
+                <div class="kpi-panel">
+                    <div class="kpi-card triage-kpi" id="kpi-triage-card">
+                        <div class="kpi-icon"><i class="fa-solid fa-inbox"></i></div>
+                        <div class="kpi-data">
+                            <div class="kpi-value" id="kpi-triage-count">0</div>
+                            <div class="kpi-label">Em Triagem</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card pending-kpi">
+                        <div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <div class="kpi-data">
+                            <div class="kpi-value" id="kpi-pending-count">0</div>
+                            <div class="kpi-label">Pendentes</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card critical-kpi">
+                        <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="kpi-data">
+                            <div class="kpi-value" id="kpi-critical-index">0%</div>
+                            <div class="kpi-label">Indice Critico</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav" id="tab-nav">
+            <button class="tab-btn active" data-tab="tab-abertura" id="tab-btn-abertura">
+                <i class="fa-solid fa-ticket-simple"></i> Abrir Chamado
+            </button>
+            <button class="tab-btn" data-tab="tab-triagem" id="tab-btn-triagem">
+                <i class="fa-solid fa-clipboard-check"></i> Triagem <span class="tab-count" id="triage-tab-count">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-fila" id="tab-btn-fila">
+                <i class="fa-solid fa-list-check"></i> Fila de Atendimento
+            </button>
+            <button class="tab-btn" data-tab="tab-analise" id="tab-btn-analise">
+                <i class="fa-solid fa-chart-line"></i> Analise Preditiva
+            </button>
+        </nav>
+
+        <!-- TAB 1: Abertura de Chamado -->
+        <div class="tab-panel active" id="tab-abertura">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-ticket-simple"></i> Abertura de Chamado</h2>
+                    <span class="badge badge-info">Portal Integrado</span>
+                </div>
+                <form id="ticket-form" class="ticket-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="solicitante-name">Nome do Solicitante (max 100)</label>
+                            <input type="text" id="solicitante-name" placeholder="Ex: Prof. Roberto Carlos" maxlength="100" required>
+                            <div class="char-counter" id="counter-name">0/100</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="solicitante-enrollment">Matricula (max 20)</label>
+                            <input type="text" id="solicitante-enrollment" placeholder="1-99999999" maxlength="20" required>
+                            <div class="char-counter" id="counter-matricula">0/20</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticket-location">Local (Bloco / Sala)</label>
+                            <select id="ticket-location" required>
+                                <option value="" disabled selected>Escolha o local...</option>
+                                <option value="Bloco A - Lab 102">Bloco A - Lab 102</option>
+                                <option value="Bloco A - Lab 104">Bloco A - Lab 104</option>
+                                <option value="Bloco B - Sala 201">Bloco B - Sala 201</option>
+                                <option value="Bloco C - Auditorio Principal">Bloco C - Auditorio Principal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticket-equipment">Equipamento com Defeito</label>
+                            <select id="ticket-equipment" required>
+                                <option value="" disabled selected>Selecione...</option>
+                                <option value="Computador (Tombamento #2203)">Computador (Tombamento #2203)</option>
+                                <option value="Datashow (Tombamento #1293)">Datashow (Tombamento #1293)</option>
+                                <option value="Infraestrutura de Rede (Roteador)">Infraestrutura de Rede (Roteador)</option>
+                                <option value="Instalacao Eletrica / Lampadas">Instalacao Eletrica / Lampadas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Priority: hidden for aluno/professor -->
+                    <div class="form-group" id="priority-group">
+                        <label for="ticket-priority">Prioridade de Atendimento</label>
+                        <select id="ticket-priority">
+                            <option value="Baixa">Baixa Prioridade</option>
+                            <option value="Media">Media Prioridade</option>
+                            <option value="Alta">Alta Prioridade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticket-title">Titulo do Chamado (max 50)</label>
+                        <input type="text" id="ticket-title" maxlength="50" placeholder="Ex: Datashow piscando luz vermelha" required>
+                        <div class="char-counter" id="counter-title">0/50</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticket-description">Descricao do Problema (max 500)</label>
+                        <textarea id="ticket-description" rows="3" maxlength="500" placeholder="Descreva detalhadamente a avaria..." required></textarea>
+                        <div class="char-counter" id="counter-desc">0/500</div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-camera"></i> Anexar Foto da Avaria</label>
+                        <div class="file-upload-placeholder" id="file-upload-trigger">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Clique para simular upload da imagem</span>
+                            <input type="file" id="ticket-file" style="display:none;">
+                        </div>
+                        <div class="upload-feedback hidden" id="upload-feedback">
+                            <i class="fa-solid fa-image"></i> imagem_defeito.jpg anexado com sucesso!
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Chamado
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 2: Triagem (Gestao + Admin) -->
+        <div class="tab-panel" id="tab-triagem">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-clipboard-check"></i> Triagem de Chamados</h2>
+                    <span class="badge badge-cyan">Pendentes de Avaliacao</span>
+                </div>
+                <p style="font-size:12px; color:var(--text-secondary); margin-bottom:16px;">
+                    Chamados enviados por alunos e professores aguardando definicao de prioridade. Defina a prioridade para encaminhar para a fila de atendimento.
+                </p>
+                <div class="triage-list" id="triage-list">
+                    <!-- Dynamic triage cards -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Fila de Atendimento -->
+        <div class="tab-panel" id="tab-fila">
+            <div class="app-grid">
+                <section class="grid-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-list-check"></i> Fila Dinamica de Atendimento</h2>
+                            <span class="badge badge-success">Auto-Ordenado</span>
+                        </div>
+                        <div class="queue-sorting-tip">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span><strong>Regra de Triagem:</strong> Chamados de <strong>Alta Prioridade</strong> sao empurrados automaticamente para o TOPO da fila.</span>
+                        </div>
+                        <div class="tickets-queue-container" id="tickets-queue"></div>
+                    </div>
+                </section>
+                <section class="grid-col">
+                    <!-- Ranking de Salas -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-ranking-star"></i> Ranking de Salas Defeituosas</h2>
+                            <span class="badge badge-alert">Recorrencia</span>
+                        </div>
+                        <p class="risk-p">Salas e Laboratorios com maior indice historico de incidentes registrados:</p>
+                        <div class="rooms-list-container" id="defective-rooms-list"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- TAB 4: Analise Preditiva -->
+        <div class="tab-panel" id="tab-analise">
+            <div class="app-grid">
+                <section class="grid-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-chart-line"></i> Algoritmo Preditivo de Falhas (Analise de Risco)</h2>
+                            <span class="badge badge-cyan">Modulo Calendario</span>
+                        </div>
+                        <div class="risk-content">
+                            <div class="calendar-alert">
+                                <div class="cal-header">
+                                    <i class="fa-solid fa-calendar-days cal-icon"></i>
+                                    <div>
+                                        <strong>Semana de Avaliacao AV1 (Proxima Semana)</strong>
+                                        <span>Calendario Letivo Critico</span>
+                                    </div>
+                                </div>
+                                <p class="risk-p">Previsao estatistica com base nas semanas de prova:</p>
+                                <div class="risk-percentage-bar">
+                                    <div class="risk-label">Risco de Falhas de Datashow no Bloco B</div>
+                                    <div class="bar-container">
+                                        <div class="bar-fill" id="risk-bar-bloco-b" style="width:87%; background:var(--accent-rose);">87%</div>
+                                    </div>
+                                </div>
+                                <div class="risk-percentage-bar">
+                                    <div class="risk-label">Risco de Sobrecarga de Rede no Bloco A</div>
+                                    <div class="bar-container">
+                                        <div class="bar-fill" id="risk-bar-bloco-a" style="width:64%; background:var(--accent-amber);">64%</div>
+                                    </div>
+                                </div>
+                                <button class="btn-accent" id="btn-preventive-maintenance">
+                                    <i class="fa-solid fa-toolbox"></i> Executar Roteiro de Manutencao Preventiva
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="grid-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-circle-info"></i> Como Funciona o Algoritmo</h2>
+                            <span class="badge badge-info">Documentacao</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-secondary); line-height:1.8;">
+                            <p style="margin-bottom:10px;"><strong style="color:var(--text-primary);">Formula do Calculo de Risco:</strong></p>
+                            <p style="margin-bottom:6px;"><strong>Bloco B:</strong> Risco = 20 + (historico x 2.5) + (chamados ativos x 18)</p>
+                            <p style="margin-bottom:12px;"><strong>Bloco A:</strong> Risco = 15 + (historico x 1.5) + (chamados ativos x 12)</p>
+                            <p style="margin-bottom:6px;">O risco e limitado a 99%. Quando a <strong style="color:var(--accent-cyan);">Manutencao Preventiva</strong> e executada, os riscos caem para 5% e 12%.</p>
+                            <p>Cada novo chamado ou mudanca de status <strong style="color:var(--accent-amber);">reseta</strong> o estado preventivo, fazendo o risco subir novamente.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
