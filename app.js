@@ -113,7 +113,7 @@ window.selectRole = function(role) {
     };
 
     if (passwords[role]) {
-        const psw = prompt(`Digite a senha para acessar como ${role} (Dica: ${passwords[role]}):`);
+        const psw = prompt(`Digite a senha para acessar como ${role}:`);
         if (psw !== passwords[role]) {
             alert("Senha incorreta!");
             return;
