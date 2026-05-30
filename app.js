@@ -106,6 +106,20 @@ const counterDesc = document.getElementById("counter-desc");
 
 // Role Selection
 window.selectRole = function(role) {
+    const passwords = {
+        aluno_professor: "",
+        gestao: "gestao123",
+        admin: "admin123"
+    };
+
+    if (passwords[role]) {
+        const psw = prompt(`Digite a senha para acessar como ${role} (Dica: ${passwords[role]}):`);
+        if (psw !== passwords[role]) {
+            alert("Senha incorreta!");
+            return;
+        }
+    }
+
     currentRole = role;
     loginOverlay.style.display = "none";
     appMain.style.display = "block";
@@ -135,6 +149,11 @@ function applyPermissions() {
     tabBtnFila.style.display = "";
     tabBtnAnalise.style.display = "";
     kpiTriageCard.style.display = "";
+    
+    const pendingKpi = document.querySelector('.pending-kpi');
+    const criticalKpi = document.querySelector('.critical-kpi');
+    if (pendingKpi) pendingKpi.style.display = "";
+    if (criticalKpi) criticalKpi.style.display = "";
 
     if (currentRole === "aluno_professor") {
         // ONLY: open tickets (no priority, no triage, no queue, no analysis)
@@ -143,6 +162,8 @@ function applyPermissions() {
         tabBtnAnalise.style.display = "none";
         kpiTriageCard.style.display = "none";
         priorityGroup.style.display = "none";
+        if (pendingKpi) pendingKpi.style.display = "none";
+        if (criticalKpi) criticalKpi.style.display = "none";
     } else if (currentRole === "gestao") {
         // CAN: open tickets, triage, view queue (read-only), view analysis (read-only)
         // CANNOT: choose priority when opening, change ticket status, run preventive maintenance
